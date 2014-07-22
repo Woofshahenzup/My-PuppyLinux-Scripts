@@ -1,0 +1,191 @@
+#!/bin/sh
+### Yapu v 2 ( Yet Another Puppy Usb Installer )
+### I'm workin this script makes bootable PuppyUsb from any distro 
+### Uses grub4dos, bootlace.com, advcpmv ( advanced copy move static package )
+### GLP3
+
+### How works?
+#1- List partitions 
+#2- Check necessary files
+#3- Format usb
+#4- Install bootlace.com
+#5- Mount usb
+#6- Mount iso
+#7- Make the work
+#8- Clean
+
+export TEXTDOMAIN=yapu
+export TEXTDOMAINDIR="/usr/share/locale"
+
+##### ALL VARIABLES #####
+
+MKFSVFAT="/sbin/mkfs.vfat"
+GRLDR="/usr/lib/grub4dos/grldr"
+BOOTLACE="/usr/sbin/bootlace.com"
+INSTALLB="bootlace.com"
+SPLASH="/usr/share/grub4dos/splash.xpm"
+TMP="/tmp/grub4dos/"
+ADVCPMV="/usr/local/bin/advcpmv/cp"
+
+############ item 1 ##############
+
+echo -e "$(gettext '\e[91m This is your partition list\e[0m')"
+echo ""
+echo ""
+fdisk -l |grep "^\/dev\/" |awk '{print $1, $2}'
+echo ""
+echo ""
+#fdisk -l |grep -e '^/' |awk '{print $1}'|sed -e "s|/dev/||g"  OTHER METHOD
+#fdisk -l 2>/dev/null | egrep  '(/dev/[^:]*):' | egrep '([^:]*)' OTHER METHOD
+
+############ item 2 ##############
+
+if [ -f "$GRLDR" ]; then
+ echo""
+ echo "$(gettext '  \e[93m Grldr already exist it will copy to /tmp/grub4dos\e[0m')" 
+ echo ""
+ mkdir /tmp/grub4dos && cp $GRLDR $TMP
+else if [ ! -f "$GRLDR" ]; then 
+ echo "$(gettext '  \e[91m Grldr is missing downloading and copying to /tmp/gru4dos...\e[0m')"
+ echo ""
+  wget -c --no-check-certificate https://copy.com/RauOYpR0XZ2Z/grldr -P /tmp/grub4dos
+  fi
+fi
+if [ -f "$SPLASH" ]; then
+ echo ""
+ echo "$(gettext '  \e[93m splash.xpm already exist, it will copy to /tmp/grub4dos\e[0m')" 
+ echo ""
+ cp $SPLASH $TMP
+else if [ ! -f "$SPLASH" ]; then 
+ echo "$(gettext '  \e[91m Splash.xpm is missing, downloading and copying to /tmp/gru4dos....\e[0m')"
+ echo ""
+ wget --no-check-certificate https://copy.com/JbVWsDTAgkno/splash.xpm -P /tmp/grub4dos
+  fi
+fi
+if [ ! -f "$MKFSVFAT" ]; then
+echo -e "$(gettext '\e[93m This script requires mkfs.vfat in /usr/sbin\e[0m')"
+	exit 1
+if [ ! -f "$BOOTLACE" ]; then
+echo -e "$(gettext '\e[93m This script requires bootlace.com in /usr/sbin\e[0m')"
+    exit 1
+fi
+if [ ! -f "$ADVCPMV" ]; then
+ echo ""
+ echo "$(gettext '  \e[91m This script requires advcpmv, downloading and installing...\e[0m')" 
+ echo ""
+  wget -c --no-check-certificate https://copy.com/CMbKswRtJJUH/advcpmv.tar.gz -P ~/
+  tar xvzf ~/advcpmv.tar.gz -C /usr/local/bin/ && chmod +x /usr/local/bin/advcpmv/
+  echo ""
+  fi
+echo ""
+echo ""
+
+############ item 3 ###########
+
+echo -ne "$(gettext '\e[92m Enter device where you will make the instalation. ex./dev/sdb1\e[0m')"
+echo ""
+read -e USB
+mkfs.vfat -F 32 $USB
+
+############ item 4 ###########
+
+echo -ne "$(gettext '\e[92m Installing grub, Enter device without numbers ex./dev/sdb, /dev/sdc\e[0m')"
+echo ""
+read -e BOOTLACEDEVICE
+echo ""
+$INSTALLB --time-out=0 $BOOTLACEDEVICE
+
+############ item 5 ###########
+
+mkdir -p /mnt/media/
+mount $USB /mnt/media/
+echo ""
+
+########### item 6 ###########
+
+echo -ne "$(gettext '\e[92m Select a custom name for your install directory (without spaces ej. Chuck_Norris\e[0m')"
+echo ""
+echo ""
+read -e MYDIR
+mkdir -p /mnt/media/$MYDIR
+echo -ne "$(gettext '\e[92m Enter the .iso fullpath ex. /mnt/sda1/imageniso.iso, you can use the TAB key to autocomplet\e[0m')"
+echo ""
+echo ""
+read -e ISO
+mkdir -p /mnt/isoimage
+sleep 2
+mount -t iso9660 -o loop $ISO /mnt/isoimage
+echo
+printf "$(gettext '      \e[34m Working...\e[0m')" 
+echo ""
+echo ""
+
+########### item 7 #############
+
+UUID=`blkid $USB | sed 's/.*UUID/uuid/g;s/ TYPE.*//g'`
+
+cat > /mnt/media/menu.lst <<EOF
+# menu.lst produced by grub4dosconfig-v1.8.0
+#color blue/cyan yellow/blue white/black cyan/black
+splashimage=/splash.xpm
+timeout 10
+default 0
+
+# Frugal installed Puppy
+
+title Puppy $MYDIR
+  $UUID
+  kernel /$MYDIR/vmlinuz   psubdir=$MYDIR pmedia=usbflash pfix=fsck
+  initrd /$MYDIR/initrd.gz
+  
+# Windows
+# this entry searches Windows on the HDD and boot it up
+title Windows\nBoot up Windows if installed
+  map (hd1) (hd0)
+  map (hd0) (hd1)
+  map --hook
+  errorcheck off
+  find --set-root --ignore-floppies --ignore-cd  /bootmgr
+  chainloader /bootmgr
+  find --set-root --ignore-floppies --ignore-cd  /ntldr
+  chainloader /ntldr
+  find --set-root --ignore-floppies --ignore-cd   /io.sys
+  chainloader /io.sys
+  errorcheck on
+EOF
+
+/usr/local/bin/advcpmv/cp /tmp/grub4dos/grldr /mnt/media/
+/usr/local/bin/advcpmv/cp /tmp/grub4dos/splash.xpm /mnt/media/
+chmod +x /mnt/media/grldr
+cd /mnt/isoimage
+/usr/local/bin/advcpmv/cp vmlinuz initrd.gz /mnt/media/$MYDIR
+/usr/local/bin/advcpmv/cp *.sfs /mnt/media/$MYDIR
+cd /mnt/media/$MYDIR
+ls -l 
+echo ""
+echo -e "$(gettext ' \e[93m If all is ok, you will see 4 files in the usb device\e[0m')"
+echo ""
+echo -e "$(gettext ' \e[93m grldr, your custom directory, menu.lst and splash.xpm\e[0m')"
+echo ""
+cd 
+
+################### item 8 #############################
+
+echo -ne "$(gettext '\e[92m Is all ok?,') [y/n]    \e[0m"
+echo ""
+read OK 
+if [ "$OK" == "y" ]; then
+echo "" 
+printf "$(gettext '  \e[93m Cleaning up...\e[0m')" 
+echo ""
+umount -r /mnt/media
+umount -r /mnt/isoimage
+rm -r /tmp/grub4dos
+rm -r ~/advcpmv.tar.gz
+rm -r /usr/local/bin/advcpmv
+echo ""
+echo -e "$(gettext ' \e[34m Done.... \e[0m')"
+echo ""
+echo ""
+else exit 1
+fi
