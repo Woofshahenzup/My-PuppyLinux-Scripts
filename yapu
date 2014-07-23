@@ -1,7 +1,8 @@
 #!/bin/sh
 ### Yapu v 2 ( Yet Another Puppy Usb Installer )
-### I'm workin this script makes bootable PuppyUsb from any distro 
-### Uses grub4dos, bootlace.com, advcpmv ( advanced copy move static package )
+### I'm working this script to makes bootable PuppyUsb from 
+#recently puppies, and maybe other distros
+### Uses grub4dos, bootlace.com, advcpmv ( advanced copy move from coreutils )
 ### GLP3
 
 ### How works?
@@ -42,22 +43,22 @@ echo ""
 
 if [ -f "$GRLDR" ]; then
  echo""
- echo "$(gettext '  \e[93m Grldr already exist it will copy to /tmp/grub4dos\e[0m')" 
+ echo -e "$(gettext '  \e[93m Grldr already exist it will copy to /tmp/grub4dos\e[0m')" 
  echo ""
  mkdir /tmp/grub4dos && cp $GRLDR $TMP
 else if [ ! -f "$GRLDR" ]; then 
- echo "$(gettext '  \e[91m Grldr is missing downloading and copying to /tmp/gru4dos...\e[0m')"
+ echo -e "$(gettext '  \e[91m Grldr is missing downloading and copying to /tmp/gru4dos...\e[0m')"
  echo ""
   wget -c --no-check-certificate https://copy.com/RauOYpR0XZ2Z/grldr -P /tmp/grub4dos
   fi
 fi
 if [ -f "$SPLASH" ]; then
  echo ""
- echo "$(gettext '  \e[93m splash.xpm already exist, it will copy to /tmp/grub4dos\e[0m')" 
+ echo -e "$(gettext '  \e[93m splash.xpm already exist, it will copy to /tmp/grub4dos\e[0m')" 
  echo ""
  cp $SPLASH $TMP
 else if [ ! -f "$SPLASH" ]; then 
- echo "$(gettext '  \e[91m Splash.xpm is missing, downloading and copying to /tmp/gru4dos....\e[0m')"
+ echo -e "$(gettext '  \e[91m Splash.xpm is missing, downloading and copying to /tmp/gru4dos....\e[0m')"
  echo ""
  wget --no-check-certificate https://copy.com/JbVWsDTAgkno/splash.xpm -P /tmp/grub4dos
   fi
@@ -65,15 +66,16 @@ fi
 if [ ! -f "$MKFSVFAT" ]; then
 echo -e "$(gettext '\e[93m This script requires mkfs.vfat in /usr/sbin\e[0m')"
 	exit 1
+fi
 if [ ! -f "$BOOTLACE" ]; then
 echo -e "$(gettext '\e[93m This script requires bootlace.com in /usr/sbin\e[0m')"
     exit 1
 fi
 if [ ! -f "$ADVCPMV" ]; then
  echo ""
- echo "$(gettext '  \e[91m This script requires advcpmv, downloading and installing...\e[0m')" 
+ echo -e "$(gettext '  \e[91m This script requires advcpmv, downloading and installing...\e[0m')" 
  echo ""
-  wget -c --no-check-certificate https://copy.com/CMbKswRtJJUH/advcpmv.tar.gz -P ~/
+  wget -c --no-check-certificate https://copy.com/b9sjvs0hM8MC/advcpmv.tar.gz -P ~/
   tar xvzf ~/advcpmv.tar.gz -C /usr/local/bin/ && chmod +x /usr/local/bin/advcpmv/
   echo ""
   fi
