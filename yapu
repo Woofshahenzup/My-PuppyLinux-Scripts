@@ -1,11 +1,11 @@
 #!/bin/sh
 ### Yapu v 2 ( Yet Another Puppy Usb Installer )
-### I'm working this script to makes bootable PuppyUsb from 
-#recently puppies, and maybe other distros
-### Uses grub4dos, bootlace.com, advcpmv ( advanced copy move from coreutils )
+### A script (under developmet) to make bootable USB from recent puppies, 
+### and maybe other distros
+### Use grub4dos, bootlace.com, advcpmv ( advanced copy move from coreutils )
 ### GPL3
 
-### How works?
+### How does it works?
 #1- List partitions 
 #2- Check necessary files
 #3- Format usb
@@ -47,7 +47,7 @@ if [ -f "$GRLDR" ]; then
  echo ""
  mkdir /tmp/grub4dos && cp $GRLDR $TMP
 else if [ ! -f "$GRLDR" ]; then 
- echo -e "$(gettext '  \e[91m Grldr is missing,downloading and copying to /tmp/gru4dos...\e[0m')"
+ echo -e "$(gettext '  \e[91m Grldr is missing, downloading and copying to /tmp/gru4dos...\e[0m')"
  echo ""
   wget -c --no-check-certificate https://copy.com/RauOYpR0XZ2Z/grldr -P /tmp/grub4dos
   fi
@@ -84,7 +84,7 @@ echo ""
 
 ############ item 3 ###########
 
-echo -ne "$(gettext '\e[92m Enter device where you will make the instalation. Ex. /dev/sdb1\e[0m')"
+echo -ne "$(gettext '\e[92m Enter a device you want to install to. Ex. /dev/sdb1\e[0m')"
 echo ""
 read -e USB
 mkfs.vfat -F 32 $USB
@@ -105,12 +105,12 @@ echo ""
 
 ########### item 6 ###########
 
-echo -ne "$(gettext '\e[92m Select a custom name for your install directory (without spaces ej. Chuck_Norris)\e[0m')"
+echo -ne "$(gettext '\e[92m Select a custom name for your install directory (without spaces ex. Chuck_Norris)\e[0m')"
 echo ""
 echo ""
 read -e MYDIR
 mkdir -p /mnt/media/$MYDIR
-echo -ne "$(gettext '\e[92m Enter the .iso fullpath ex. /mnt/sda1/imageniso.iso, you can use the TAB key to autocomplet\e[0m')"
+echo -ne "$(gettext '\e[92m Enter the .iso fullpath ex. /mnt/sda1/imageniso.iso, you can use the TAB key to autocomplete\e[0m')"
 echo ""
 echo ""
 read -e ISO
@@ -167,7 +167,7 @@ ls -l
 echo ""
 echo -e "$(gettext ' \e[93m If all is ok, you will see 4 files in the usb device\e[0m')"
 echo ""
-echo -e "$(gettext ' \e[93m grldr, your custom directory, menu.lst and splash.xpm files\e[0m')"
+echo -e "$(gettext ' \e[93m grldr, your custom directory, menu.lst and splash.xpm\e[0m')"
 echo ""
 cd 
 
