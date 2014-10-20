@@ -1,0 +1,39 @@
+#!/bin/sh
+##Nilsonmoraes 10/2014
+##Script para revisar version de flashplayer
+W3M="/usr/bin/w3m"
+##funciones
+function verinst() {
+	strings -n13 /usr/lib${lsuffix}/mozilla/plugins/libflashplayer.so  | grep 'FlashPlayer_' | cut -d '_' -f2-5| tr '_' '.'
+}
+function veract() {
+	curl http://www.adobe.com/software/flash/about/ -s | w3m -dump -T text/html | grep Linux | awk '{ print $10; }'
+}
+
+if [ ! -f "$W3M" ]; then
+   echo -e "\e[00;33mNo se encuentra w3m para ver la última versión de libflashplayer\e[00m"
+   echo -e "\e[00;32mLa versión de libflashplayer instalada en este equipo es:\e[00m" 
+verinst
+ else if [  -f "$W3M" ]; then
+   echo -e "\e[00;32mVersión Instalada\e[00m"
+verinst
+   echo -e "\e[00;32mVersión Actual\e[00m"
+veract
+     fi
+  fi
+if [  -f "$W3M" ]; then
+exit
+ else if [ ! -f "$W3M" ]; then
+   echo -n -e "\e[00;33mDesea instalar w3m? s/n \e[00m"
+read descarga
+if [ "$descarga" = "s" ]; then
+wget -c --no-check-certificate https://copy.com/sNFpbhTgTeKnvlJG/w3m -P /usr/bin 
+chmod +x /usr/bin/w3m
+  echo -e "\e[00;33mProbando nuevamente...\e[00m"
+  echo -e "\e[00;32mVersión Instalada\e[00m"
+verinst
+  echo -e "\e[00;32mVersión Actual\e[00m"
+veract
+fi
+  fi
+fi
