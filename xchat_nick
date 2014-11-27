@@ -1,0 +1,17 @@
+#!/bin/sh 
+#Hack for xchat
+## nilsonmorales apg instead random
+rm /root/.xchat2/xchat.conf
+cp -f /root/.xchat2/xchat.orig /root/.xchat2/xchat.conf
+chmod 777 /root/.xchat2/xchat.conf
+sleep 1
+DIR="$HOME/.xchat2/xchat.conf"
+  if [ -f $HOME/.xchat2/xchat.conf ];then
+#		x=$RANDOM  
+		x=`apg -a 0 -q -n 1`
+		sed -i -e "s|Fxrdg|Fxrdg${x}|" \
+				-e  "s|Fxrdg1|Fxrdg${x}1|" \
+				-e "s|Fxrdg2|Fxrdg${x}2|" \
+				$HOME/.xchat2/xchat.conf
+  fi
+  
