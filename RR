@@ -1,0 +1,91 @@
+#!/bin/sh
+## respaldar pupsave con ext. 2,3,4fs 
+## cambio de rxvt por urxvt
+tail -n +4 $0  > /tmp/backupscript.txt
+exec urxvt -bg orange -fg black -e sh /tmp/backupscript.txt
+DATE=`date +%e-%m-%y`
+if [ -f /tmp/PUPSAVE ]
+then
+rm /tmp/PUPSAVE
+fi
+echo "[r]estaurar or [b]respaldar"
+read RB
+
+if [ "$RB" = r ];then
+FND_BACKUP="`find /mnt/home/ -maxdepth 3 -mount -type f -name *-??-??`"
+echo "$FND_BACKUP" >> /tmp/PUPSAVE
+NUM=`wc -l /tmp/PUPSAVE | tr -s ' ' | cut -f 2 -d ' '`
+
+echo Elija cual archivo de Respaldo desea Restaurar.
+   CHOOSE=1
+   for ONECHOICE in `cat /tmp/PUPSAVE | tr '\n' ' '`
+   do
+    ONEPART="`echo -n "$ONECHOICE" | cut -f 1 -d ','`"
+    echo -e "${CHOOSE}  ${ONEPART}"
+    CHOOSE=`expr $CHOOSE + 1`
+   done
+ read SAVENUM
+     PUPSAVE="`cat /tmp/PUPSAVE | tr '\n' ' ' | cut -f $SAVENUM -d ' '`"
+NAME="${PUPSAVE%/*}"
+NAME="${NAME%???}.${NAME:${#NAME}-3}"
+echo $NAME
+echo Esta seguro? Se va a remover el Archivo Save anterior. [y/n]
+read sureornot
+if [ "$sureornot" = n ];then
+echo Hasta Luego...
+read
+fi
+if [ "$sureornot" = y ];then
+echo removiendo $NAME
+rm $NAME
+echo Copiando $PUPSAVE to $NAME...Se va a cerrar cuando finalice.
+cp -p "$PUPSAVE" "$NAME"
+fi
+fi
+
+if [ "$RB" = b ];then
+FND_PUPSAVE="`find /mnt/home/ -maxdepth 2 -mount -type f -name *save*.[234]fs`"
+echo "$FND_PUPSAVE" >> /tmp/PUPSAVE
+NUM=`wc -l /tmp/PUPSAVE | tr -s ' ' | cut -f 2 -d ' '`
+
+case $NUM in
+0)
+echo No se encuentra Pupsave.
+read
+;;
+1)
+NAME="`echo $FND_PUPSAVE | tr -d "."`"
+if [ -d $NAME ];then
+echo Nombre $NAME ya existe.
+else
+mkdir $NAME
+fi
+echo Copiando a $NAME ... Se va a cerrar cuando finalice.
+cp -p "$FND_PUPSAVE" "$NAME/$DATE"
+;;
+*)echo Elegir cual Archivo Save le gustaría respaldar.
+   CHOOSE=1
+   for ONECHOICE in `cat /tmp/PUPSAVE | tr '\n' ' '`
+   do
+    ONEPART="`echo -n "$ONECHOICE" | cut -f 1 -d ','`"
+    echo -e "${CHOOSE}  ${ONEPART}"
+    CHOOSE=`expr $CHOOSE + 1`
+   done
+ read SAVENUM
+     PUPSAVE="`cat /tmp/PUPSAVE | tr '\n' ' ' | cut -f $SAVENUM -d ' '`"
+NAME="`echo $PUPSAVE | tr -d "."`"
+if [ -d $NAME ];then
+echo Nombre $NAME ya existe.
+else
+mkdir $NAME
+fi
+echo Copiando a $NAME ... Se va a cerrar cuando finalice.
+cp -p "$PUPSAVE" "$NAME/$DATE"
+;;
+esac
+fi
+if [ -f "$NAME/ $DATE" ]
+then
+mv "$NAME/ $DATE" "$NAME/$DATE"
+fi
+rm /tmp/PUPSAVE
